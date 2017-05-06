@@ -19,10 +19,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.type.CollectionType;
-import org.codehaus.jackson.map.type.TypeFactory;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.springframework.social.MissingAuthorizationException;
 import org.springframework.social.UncategorizedApiException;
 import org.springframework.social.support.URIBuilder;
@@ -50,7 +51,7 @@ abstract class AbstractWeiboOperations {
 
 	protected void requireAuthorization() {
 		if (!isAuthorized) {
-			throw new MissingAuthorizationException();
+			throw new MissingAuthorizationException("weibo");
 		}
 	}
 
@@ -79,13 +80,13 @@ abstract class AbstractWeiboOperations {
 		CursoredList<T> result = new CursoredList<T>();
 		JsonNode previousCursorNode = jsonNode.get("previous_cursor");
 		if (previousCursorNode != null) {
-			result.setPreviousCursor(previousCursorNode.getLongValue());
+			result.setPreviousCursor(previousCursorNode.asLong());
 		}
 		JsonNode nextCursorNode = jsonNode.get("next_cursor");
 		if (nextCursorNode != null) {
-			result.setNextCursor(nextCursorNode.getLongValue());
+			result.setNextCursor(nextCursorNode.asLong());
 		}
-		result.setTotalNumber(jsonNode.get("total_number").getIntValue());
+		result.setTotalNumber(jsonNode.get("total_number").asInt());
 		result.addAll(deserializeDataList(jsonNode.get(dataFieldName),
 				elementType));
 		return result;
@@ -97,9 +98,9 @@ abstract class AbstractWeiboOperations {
 		try {
 			CollectionType listType = TypeFactory.defaultInstance()
 					.constructCollectionType(List.class, elementType);
-			return (List<T>) objectMapper.readValue(jsonNode, listType);
+			return (List<T>) objectMapper.reader(listType).readValue(jsonNode.toString());
 		} catch (IOException e) {
-			throw new UncategorizedApiException(
+			throw new UncategorizedApiException("weibo",
 					"Error deserializing data from Weibo: " + e.getMessage(), e);
 		}
 	}
