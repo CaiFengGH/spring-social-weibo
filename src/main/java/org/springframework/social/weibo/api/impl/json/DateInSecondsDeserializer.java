@@ -15,13 +15,15 @@
  */
 package org.springframework.social.weibo.api.impl.json;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+
 import java.io.IOException;
 import java.util.Date;
 
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
+
 
 public class DateInSecondsDeserializer extends JsonDeserializer<Date> {
 

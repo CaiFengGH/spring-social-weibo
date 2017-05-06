@@ -24,13 +24,15 @@ import java.util.Map.Entry;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.JsonParser;
-import org.codehaus.jackson.JsonProcessingException;
-import org.codehaus.jackson.map.DeserializationContext;
-import org.codehaus.jackson.map.JsonDeserializer;
+
 import org.springframework.social.weibo.api.Trends;
 import org.springframework.social.weibo.api.Trends.Trend;
 
@@ -63,27 +65,32 @@ public class TrendsDeserializer extends JsonDeserializer<SortedSet<Trends>> {
 			JsonProcessingException {
 		SimpleDateFormat dateFormat = new SimpleDateFormat();
 		TreeSet<Trends> result = new TreeSet<Trends>(comparator);
-		for (Iterator<Entry<String, JsonNode>> iterator = jp.readValueAsTree()
-				.getFields(); iterator.hasNext();) {
-			Entry<String, JsonNode> next = iterator.next();
+		TreeNode treeNode = jp.readValueAsTree();
+
+		Iterator<String> fieldNames = treeNode.fieldNames();
+
+		while (fieldNames.hasNext()) {
 			Trends trends = new Trends();
 			try {
-				dateFormat
-						.applyPattern(retrieveDateFormatPattern(next.getKey()));
-				trends.setDate(dateFormat.parse(next.getKey()));
-				JsonNode trendsNode = next.getValue();
-				for (Iterator<JsonNode> iterator2 = trendsNode.getElements(); iterator2
-						.hasNext();) {
-					JsonParser nodeParser = iterator2.next().traverse();
+				String filedName = fieldNames.next();
+				dateFormat.applyPattern(retrieveDateFormatPattern(filedName));
+				trends.setDate(dateFormat.parse(filedName));
+				TreeNode trendsNode = treeNode.get(filedName);
+				Iterator<String> names = treeNode.fieldNames();
+				while (names.hasNext()) {
+					String name = names.next();
+					JsonParser nodeParser = trendsNode.get(name).traverse();
 					nodeParser.setCodec(jp.getCodec());
 					Trend readValueAs = nodeParser.readValueAs(Trend.class);
 					trends.getTrends().add(readValueAs);
 				}
+
 				result.add(trends);
 			} catch (ParseException e) {
 				logger.warn("Unable to parse date", e);
 			}
 		}
+
 		return result;
 	}
 
