@@ -38,75 +38,74 @@ import org.springframework.social.weibo.api.Trends.Trend;
 
 public class TrendsDeserializer extends JsonDeserializer<SortedSet<Trends>> {
 
-	private static final Log logger = LogFactory
-			.getLog(TrendsDeserializer.class.getName());
+    private static final Log logger = LogFactory
+            .getLog(TrendsDeserializer.class.getName());
 
-	private static final Comparator<? super Trends> comparator = new Comparator<Trends>() {
+    private static final Comparator<? super Trends> comparator = new Comparator<Trends>() {
 
-		@Override
-		public int compare(Trends o1, Trends o2) {
-			if (o1.getDate() == null) {
-				if (o2.getDate() == null) {
-					return 0;
-				} else {
-					return 1;
-				}
-			} else if (o2.getDate() == null) {
-				return -1;
-			} else {
-				return o1.getDate().compareTo(o2.getDate());
-			}
-		}
-	};
+        @Override
+        public int compare(Trends o1, Trends o2) {
+            if (o1.getDate() == null) {
+                if (o2.getDate() == null) {
+                    return 0;
+                } else {
+                    return 1;
+                }
+            } else if (o2.getDate() == null) {
+                return -1;
+            } else {
+                return o1.getDate().compareTo(o2.getDate());
+            }
+        }
+    };
 
-	@Override
-	public SortedSet<Trends> deserialize(JsonParser jp,
-			DeserializationContext ctxt) throws IOException,
-			JsonProcessingException {
-		SimpleDateFormat dateFormat = new SimpleDateFormat();
-		TreeSet<Trends> result = new TreeSet<Trends>(comparator);
-		TreeNode treeNode = jp.readValueAsTree();
+    @Override
+    public SortedSet<Trends> deserialize(JsonParser jp,
+                                         DeserializationContext ctxt) throws IOException,
+            JsonProcessingException {
+        SimpleDateFormat dateFormat = new SimpleDateFormat();
+        TreeSet<Trends> result = new TreeSet<Trends>(comparator);
+        TreeNode treeNode = jp.readValueAsTree();
 
-		Iterator<String> fieldNames = treeNode.fieldNames();
+        Iterator<String> fieldNames = treeNode.fieldNames();
 
-		while (fieldNames.hasNext()) {
-			Trends trends = new Trends();
-			try {
-				String filedName = fieldNames.next();
-				dateFormat.applyPattern(retrieveDateFormatPattern(filedName));
-				trends.setDate(dateFormat.parse(filedName));
-				TreeNode trendsNode = treeNode.get(filedName);
-				Iterator<String> names = treeNode.fieldNames();
-				while (names.hasNext()) {
-					String name = names.next();
-					JsonParser nodeParser = trendsNode.get(name).traverse();
-					nodeParser.setCodec(jp.getCodec());
-					Trend readValueAs = nodeParser.readValueAs(Trend.class);
-					trends.getTrends().add(readValueAs);
-				}
+        while (fieldNames.hasNext()) {
+            Trends trends = new Trends();
+            try {
+                String filedName = fieldNames.next();
+                dateFormat.applyPattern(retrieveDateFormatPattern(filedName));
+                trends.setDate(dateFormat.parse(filedName));
+                TreeNode trendsNode = treeNode.get(filedName);
+                if (trendsNode.isArray()) {
+                    for (int i = 0; i < trendsNode.size(); i++) {
+                        JsonParser nodeParser = trendsNode.get(i).traverse();
+                        nodeParser.setCodec(jp.getCodec());
+                        Trend readValueAs = nodeParser.readValueAs(Trend.class);
+                        trends.getTrends().add(readValueAs);
+                    }
+                }
+                result.add(trends);
+            } catch (ParseException e) {
+                logger.warn("Unable to parse date", e);
+            }
+        }
 
-				result.add(trends);
-			} catch (ParseException e) {
-				logger.warn("Unable to parse date", e);
-			}
-		}
+        return result;
+    }
 
-		return result;
-	}
-
-	private String retrieveDateFormatPattern(String key) {
-		String result = null;
-		switch (key.length()) {
-		case 19:
-			result = "yyyy-MM-dd HH:mm:ss";
-			break;
-		case 16:
-			result = "yyyy-MM-dd HH:mm";
-			break;
-		default:
-			result = "yyyy-MM-dd";
-			break;
-		}
-		return result;
-	}
+    private String retrieveDateFormatPattern(String key) {
+        String result = null;
+        switch (key.length()) {
+            case 19:
+                result = "yyyy-MM-dd HH:mm:ss";
+                break;
+            case 16:
+                result = "yyyy-MM-dd HH:mm";
+                break;
+            default:
+                result = "yyyy-MM-dd";
+                break;
+        }
+        return result;
+    }
 }
