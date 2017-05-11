@@ -15,7 +15,7 @@
  */
 package org.springframework.social.weibo.api.impl;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.social.weibo.api.UserOperations;
 import org.springframework.social.weibo.api.WeiboProfile;
 import org.springframework.web.client.RestTemplate;

@@ -16,64 +16,65 @@
 package org.springframework.social.weibo.api.impl;
 
 import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.social.test.client.RequestMatchers.method;
-import static org.springframework.social.test.client.RequestMatchers.requestTo;
-import static org.springframework.social.test.client.ResponseCreators.withResponse;
 import static org.springframework.social.weibo.api.impl.WeiboProfileMatcher.verifyWeiboProfile;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import org.junit.Test;
+import org.springframework.http.MediaType;
 import org.springframework.social.weibo.api.WeiboProfile;
 
 public class UserTemplateTest extends AbstractWeiboOperationsTest {
 
-	private UserTemplate userTemplate;
+    private UserTemplate userTemplate;
 
-	@Override
-	public void setUp() {
-		userTemplate = new UserTemplate(getObjectMapper(), getRestTemplate(),
-				true);
-	}
+    @Override
+    public void setUp() {
+        userTemplate = new UserTemplate(getObjectMapper(), getRestTemplate(),
+                true);
+    }
 
-	@Test
-	public void testGetUserProfileByDomainName() {
-		mockServer
-				.expect(requestTo("https://api.weibo.com/2/users/domain_show.json?domain=domain"))
-				.andExpect(method(GET))
-				.andRespond(
-						withResponse(jsonResource("profile"), responseHeaders));
+    @Test
+    public void testGetUserProfileByDomainName() {
+        mockServer
+                .expect(requestTo("https://api.weibo.com/2/users/domain_show.json?domain=domain"))
+                .andExpect(method(GET))
+                .andRespond(
+                        withSuccess(jsonResource("profile"), MediaType.APPLICATION_JSON));
 
-		WeiboProfile profile = userTemplate
-				.getUserProfileByDomainName("domain");
-		verifyWeiboProfile(profile);
-	}
+        WeiboProfile profile = userTemplate
+                .getUserProfileByDomainName("domain");
+        verifyWeiboProfile(profile);
+    }
 
-	@Test
-	public void testGetUserProfileById() {
-		long uid = 123L;
-		mockServer
-				.expect(requestTo("https://api.weibo.com/2/users/show.json?uid="
-						+ uid))
-				.andExpect(method(GET))
-				.andRespond(
-						withResponse(jsonResource("profile"), responseHeaders));
+    @Test
+    public void testGetUserProfileById() {
+        long uid = 123L;
+        mockServer
+                .expect(requestTo("https://api.weibo.com/2/users/show.json?uid="
+                        + uid))
+                .andExpect(method(GET))
+                .andRespond(
+                        withSuccess(jsonResource("profile"), MediaType.APPLICATION_JSON));
 
-		WeiboProfile profile = userTemplate.getUserProfileById(uid);
-		verifyWeiboProfile(profile);
-	}
+        WeiboProfile profile = userTemplate.getUserProfileById(uid);
+        verifyWeiboProfile(profile);
+    }
 
-	@Test
-	public void testGetUserProfileByScreenName() {
-		String screenName = "Cirrus_Test1";
-		mockServer
-				.expect(requestTo("https://api.weibo.com/2/users/show.json?screen_name="
-						+ screenName))
-				.andExpect(method(GET))
-				.andRespond(
-						withResponse(jsonResource("profile"), responseHeaders));
+    @Test
+    public void testGetUserProfileByScreenName() {
+        String screenName = "Cirrus_Test1";
+        mockServer
+                .expect(requestTo("https://api.weibo.com/2/users/show.json?screen_name="
+                        + screenName))
+                .andExpect(method(GET))
+                .andRespond(
+                        withSuccess(jsonResource("profile"), MediaType.APPLICATION_JSON));
 
-		WeiboProfile profile = userTemplate
-				.getUserProfileByScreenName(screenName);
-		verifyWeiboProfile(profile);
-	}
+        WeiboProfile profile = userTemplate
+                .getUserProfileByScreenName(screenName);
+        verifyWeiboProfile(profile);
+    }
 
 }

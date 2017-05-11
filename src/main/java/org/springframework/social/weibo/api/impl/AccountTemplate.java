@@ -17,7 +17,7 @@ package org.springframework.social.weibo.api.impl;
 
 import java.util.Map;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.social.weibo.api.AccountOperations;
 import org.springframework.social.weibo.api.RateLimitStatus;
 import org.springframework.web.client.RestTemplate;

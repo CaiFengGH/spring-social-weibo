@@ -15,8 +15,8 @@
  */
 package org.springframework.social.weibo.api.impl.json;
 
-import org.codehaus.jackson.Version;
-import org.codehaus.jackson.map.module.SimpleModule;
+
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.social.weibo.api.ApiRateLimit;
 import org.springframework.social.weibo.api.Comment;
 import org.springframework.social.weibo.api.Favorite;
@@ -32,7 +32,7 @@ import org.springframework.social.weibo.api.impl.json.FavoriteMixin.TagMixin;
 public class WeiboModule extends SimpleModule {
 
 	public WeiboModule() {
-		super("WeiboModule", new Version(1, 0, 0, null));
+		super("WeiboModule");
 	}
 
 	@Override
